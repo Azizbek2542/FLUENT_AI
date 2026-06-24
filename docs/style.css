@@ -170,13 +170,13 @@ nav{
 }
 
 .hero {
-    min-height: 100vh;
+    min-height: 100dvh;
+    background: yellow;
     display: grid;
     gap: 0;
     padding-top: 73px;
     overflow: hidden;
     justify-content: center;
-    align-items: center;
 }
 
 .logo{font-family:var(--serif);font-size:24px;color:var(--ink);text-decoration:none;letter-spacing:-.5px}

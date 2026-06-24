@@ -23,8 +23,8 @@
   --sans:'DM Sans',sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
 }
-html{scroll-behavior:smooth;font-size:16px}
-body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2); overflow-x:hidden;line-height:1.65;transition: all .3s ease;}
+html{scroll-behavior:smooth;font-size:16px;height:100%;}
+body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2); overflow-x:hidden;line-height:1.65;transition: all .3s ease; height:100%;}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background: #d6d6d5;border-radius:3px}
 ::selection{background: var(--jade2);color: var(--ivory);}

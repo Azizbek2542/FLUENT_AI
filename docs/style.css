@@ -23,8 +23,44 @@
   --sans:'DM Sans',sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
 }
-html{scroll-behavior:smooth;font-size:16px;height:100%;}
-body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2); overflow-x:hidden;line-height:1.65;transition: all .3s ease; height:100%;}
+
+html, body {
+  height: var(--vh, 100dvh);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html {
+  scroll-behavior:smooth;
+  font-size:16px
+}
+
+/* Для Safari старого */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Контейнер чата — скролл только здесь */
+.chat-panel,
+.chat-messages {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* плавный скролл iOS */
+  overscroll-behavior: contain; /* не цепляет body */
+}
+
+/* Твоя панель */
+.chat-panel {
+  max-height: calc(var(--vh, 100dvh) - 73px);
+  display: flex;
+  flex-direction: column;
+  max-width: 60%;
+  margin: 0 auto;
+}
+
+body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2); line-height:1.65;transition: all .3s ease;}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background: #d6d6d5;border-radius:3px}
 ::selection{background: var(--jade2);color: var(--ivory);}
@@ -41,7 +77,6 @@ body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2);
 .hidden{display:none!important}
 
 /* Chat Panel */
-.chat-panel{display:flex;flex-direction:column;max-height: calc(100dvh - 73px);max-width: 60%; margin: 0 auto;}
 @media(max-width:768px) {
     .chat-panel {
         margin: unset;
@@ -176,6 +211,7 @@ nav{
     padding-top: 73px;
     overflow: hidden;
     justify-content: center;
+    align-items: center;
 }
 
 .logo{font-family:var(--serif);font-size:24px;color:var(--ink);text-decoration:none;letter-spacing:-.5px}

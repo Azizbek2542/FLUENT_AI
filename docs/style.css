@@ -171,7 +171,6 @@ nav{
 
 .hero {
     min-height: 100dvh;
-    background: rgba(0, 0, 0, 0.5);
     display: grid;
     gap: 0;
     padding-top: 73px;

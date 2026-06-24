@@ -41,7 +41,7 @@ body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2);
 .hidden{display:none!important}
 
 /* Chat Panel */
-.chat-panel{display:flex;flex-direction:column;max-height: calc(100vh - 73px);max-width: 60%; margin: 0 auto;}
+.chat-panel{display:flex;flex-direction:column;max-height: calc(100dvh - 73px);max-width: 60%; margin: 0 auto;}
 @media(max-width:768px) {
     .chat-panel {
         margin: unset;

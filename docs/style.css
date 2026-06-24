@@ -170,7 +170,7 @@ nav{
 }
 
 .hero {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     gap: 0;
     padding-top: 73px;

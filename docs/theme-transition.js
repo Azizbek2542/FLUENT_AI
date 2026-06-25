@@ -14,6 +14,18 @@
   style.textContent = `
     .no-tr, .no-tr * { transition: none !important; }
 
+    /* ТОТ САМЫЙ ОБХОДНОЙ ПУТЬ ЧЕРЕЗ CSS */
+    /* Принудительно выравниваем слои по размеру динамического мобильного вьюпорта */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      position: fixed !important;
+      inset: 0 !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+      object-fit: cover !important;
+      object-position: top !important;
+    }
+
     .to-dark::view-transition-old(root) { z-index: 1; animation: none; }
     .to-dark::view-transition-new(root) { z-index: 2; animation: vt-expand var(--vt-dur,600ms) cubic-bezier(.4,0,.2,1) forwards; }
 
@@ -44,54 +56,16 @@
     if (btnText)  btnText.textContent = dark ? 'Light mode' : 'Dark mode';
   }
 
-  function getGeometry(e) {
-    const test = document.createElement('div');
-    test.style.cssText = 'position:fixed;top:0;left:0;height:100vh;visibility:hidden;pointer-events:none;';
-    document.body.appendChild(test);
-    const rect = test.getBoundingClientRect();
-    document.body.removeChild(test);
-
-    const fullHeight = rect.height;
-    const barHeight  = Math.max(0, fullHeight - window.innerHeight);
-
-    let topBarOffset = 0;
-
-    // Проверяем: это чистый мобильный Chrome? (Исключаем Samsung)
-    const ua = navigator.userAgent;
-    const isSamsung = /SamsungBrowser/i.test(ua);
-    const isPureChromeMobile = /Chrome/i.test(ua) && /Android/i.test(ua) && !isSamsung;
-
-    // Сдвиг нужен только для чистого Chrome с верхней адресной строкой
-    if (isPureChromeMobile && barHeight > 0) {
-      if (e && typeof e.screenY === 'number' && typeof e.clientY === 'number') {
-        const totalTop = e.screenY - e.clientY;
-        if (totalTop > 65) {
-          topBarOffset = barHeight;
-        }
-      } else {
-        topBarOffset = barHeight;
-      }
+  function getClickCenter(e) {
+    // Берем чистые координаты клика по экрану
+    if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+      return { x: Math.round(e.clientX), y: Math.round(e.clientY) };
     }
-
-    return { topBarOffset, fullHeight };
-  }
-
-  function getSVGCenter(topBarOffset) {
-    const svg = themeBtn?.querySelector('svg');
-    const el  = svg || themeBtn;
-    if (!el) return { visual: { x: window.innerWidth/2, y: 40 }, layout: { x: window.innerWidth/2, y: 40 } };
-
-    const r   = el.getBoundingClientRect();
-    const vcx = r.left + r.width  / 2;
-    const vcy = r.top  + r.height / 2;
-
-    const vv      = window.visualViewport;
-    const offX    = vv ? vv.offsetLeft : 0;
-    const offY    = vv ? vv.offsetTop  : 0;
-
+    // Если кликнули с клавиатуры — берем центр кнопки
+    const rect = themeBtn ? themeBtn.getBoundingClientRect() : { left: window.innerWidth/2, top: 40, width: 0, height: 0 };
     return {
-      visual: { x: Math.round(vcx),        y: Math.round(vcy) },
-      layout: { x: Math.round(vcx + offX), y: Math.round(vcy + offY + topBarOffset) }
+      x: Math.round(rect.left + rect.width / 2),
+      y: Math.round(rect.top + rect.height / 2)
     };
   }
 
@@ -103,28 +77,16 @@
     if (busy) return;
     busy = true;
 
-    const geometry = getGeometry(e);
-    const centers  = getSVGCenter(geometry.topBarOffset);
+    const center   = getClickCenter(e);
     const dur      = 600;
     const nextDark = !isDark;
 
-    const vv = window.visualViewport;
-    const lw = window.innerWidth;
-    const lh = geometry.fullHeight;
-    const vw = vv ? vv.width  : window.innerWidth;
-    const vh = geometry.fullHeight;
+    const w = window.innerWidth;
+    const h = window.innerHeight; 
+    const r = maxR(center.x, center.y, w, h);
 
-    const lcx = centers.layout.x;
-    const lcy = centers.layout.y;
-    const lr  = maxR(lcx, lcy, lw, lh);
-    const vtSmall = `circle(0px at ${lcx}px ${lcy}px)`;
-    const vtBig   = `circle(${lr}px at ${lcx}px ${lcy}px)`;
-
-    const vcx = centers.visual.x;
-    const vcy = centers.visual.y;
-    const vr  = maxR(vcx, vcy, vw, vh);
-    const ovSmall = `circle(0px at ${vcx}px ${vcy}px)`;
-    const ovBig   = `circle(${vr}px at ${vcx}px ${vcy}px)`;
+    const vtSmall = `circle(0px at ${center.x}px ${center.y}px)`;
+    const vtBig   = `circle(${r}px at ${center.x}px ${center.y}px)`;
 
     if (document.startViewTransition) {
       const root = document.documentElement;
@@ -143,14 +105,15 @@
       return;
     }
 
+    // Резервный сценарий для старых браузеров (тоже работает через чистый fixed div)
     document.body.classList.add('no-tr');
     const ov = document.createElement('div');
-    ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${ovSmall};will-change:clip-path;`;
+    ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${vtSmall};will-change:clip-path;`;
     document.body.appendChild(ov);
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
       ov.style.transition = `clip-path ${dur}ms cubic-bezier(.4,0,.2,1)`;
-      ov.style.clipPath   = ovBig;
+      ov.style.clipPath   = vtBig;
       ov.addEventListener('transitionend', () => {
         isDark = nextDark;
         applyTheme(isDark);

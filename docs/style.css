@@ -165,7 +165,7 @@ nav{
 }
 
 .dark-mode nav {
-    box-shadow: 0 5px 18px green;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.5);
 }
 
 .hero {

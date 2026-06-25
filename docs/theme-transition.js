@@ -7,8 +7,8 @@
   const themeBtn = document.getElementById('theme');
 
   const MOON_SVG = `<svg class="moon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><g fill="none" stroke="currentcolor" stroke-dasharray="4" stroke-dashoffset="4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"><path d="M13 4h1.5M13 4h-1.5M13 4v1.5M13 4v-1.5"><animate id="a0" fill="freeze" attributeName="stroke-dashoffset" begin="0.7s;a0.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a0.begin+2s;a0.begin+4s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a0.begin+1.2s;a0.begin+3.2s;a0.begin+5.2s" dur="0.4s" values="0;4"/><set fill="freeze" attributeName="d" begin="a0.begin+1.8s" to="M12 5h1.5M12 5h-1.5M12 5v1.5M12 5v-1.5"/><set fill="freeze" attributeName="d" begin="a0.begin+3.8s" to="M12 4h1.5M12 4h-1.5M12 4v1.5M12 4v-1.5"/><set fill="freeze" attributeName="d" begin="a0.begin+5.8s" to="M13 4h1.5M13 4h-1.5M13 4v1.5M13 4v-1.5"/></path><path d="M19 11h1.5M19 11h-1.5M19 11v1.5M19 11v-1.5"><animate id="a1" fill="freeze" attributeName="stroke-dashoffset" begin="1.1s;a1.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a1.begin+2s;a1.begin+4s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a1.begin+1.2s;a1.begin+3.2s;a1.begin+5.2s" dur="0.4s" values="0;4"/><set fill="freeze" attributeName="d" begin="a1.begin+1.8s" to="M17 11h1.5M17 11h-1.5M17 11v1.5M17 11v-1.5"/><set fill="freeze" attributeName="d" begin="a1.begin+3.8s" to="M18 12h1.5M18 12h-1.5M18 12v1.5M18 12v-1.5"/><set fill="freeze" attributeName="d" begin="a1.begin+5.8s" to="M19 11h1.5M19 11h-1.5M19 11v1.5M19 11v-1.5"/></path><path d="M19 4h1.5M19 4h-1.5M19 4v1.5M19 4v-1.5"><animate id="a2" fill="freeze" attributeName="stroke-dashoffset" begin="2s;a2.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a2.begin+2s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="a2.begin+1.2s;a2.begin+3.2s" dur="0.4s" values="0;4"/><set fill="freeze" attributeName="d" begin="a2.begin+1.8s" to="M20 5h1.5M20 5h-1.5M20 5v1.5M20 5v-1.5"/><set fill="freeze" attributeName="d" begin="a2.begin+5.8s" to="M19 4h1.5M19 4h-1.5M19 4v1.5M19 4v-1.5"/></path></g><path fill="none" stroke="currentcolor" stroke-dasharray="56" stroke-dashoffset="56" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 6 C7 12.08 11.92 17 18 17 C18.53 17 19.05 16.96 19.56 16.89 C17.95 19.36 15.17 21 12 21 C7.03 21 3 16.97 3 12 C3 8.83 4.64 6.05 7.11 4.44 C7.04 4.95 7 5.47 7 6 Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="56;0"/></path></svg>`;
-  const SUN_SVG = `<svg class="sun" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="36" stroke-dashoffset="36" d="M12 7c2.76 0 5 2.24 5 5c0 2.76 -2.24 5 -5 5c-2.76 0 -5 -2.24 -5 -5c0 -2.76 2.24 -5 5 -5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="36;0"/></path><g><path stroke-dasharray="2" stroke-dashoffset="2" d="M12 19v1M19 12h1M12 5v-1M5 12h-1"><animate fill="freeze" attributeName="d" begin="0.5s" dur="0.2s" values="M12 19v1M19 12h1M12 5v-1M5 12h-1;M12 21v1M21 12h1M12 3v-1M3 12h-1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="2;0"/></path><path stroke-dasharray="2" stroke-dashoffset="2" d="M17 17l0.5 0.5M17 7l0.5 -0.5M7 7l-0.5 -0.5M7 17l-0.5 0.5"><animate fill="freeze" attributeName="d" begin="0.7s" dur="0.2s" values="M17 17l0.5 0.5M17 7l0.5 -0.5M7 7l-0.5 -0.5M7 17l-0.5 0.5;M18.5 18.5l0.5 0.5M18.5 5.5l0.5 -0.5M5.5 5.5l-0.5 -0.5M5.5 18.5l-0.5 0.5"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="2;0"/></path><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`;
 
+  const SUN_SVG = `<svg class="sun" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="36" stroke-dashoffset="36" d="M12 7c2.76 0 5 2.24 5 5c0 2.76 -2.24 5 -5 5c-2.76 0 -5 -2.24 -5 -5c0 -2.76 2.24 -5 5 -5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="36;0"/></path><g><path stroke-dasharray="2" stroke-dashoffset="2" d="M12 19v1M19 12h1M12 5v-1M5 12h-1"><animate fill="freeze" attributeName="d" begin="0.5s" dur="0.2s" values="M12 19v1M19 12h1M12 5v-1M5 12h-1;M12 21v1M21 12h1M12 3v-1M3 12h-1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="2;0"/></path><path stroke-dasharray="2" stroke-dashoffset="2" d="M17 17l0.5 0.5M17 7l0.5 -0.5M7 7l-0.5 -0.5M7 17l-0.5 0.5"><animate fill="freeze" attributeName="d" begin="0.7s" dur="0.2s" values="M17 17l0.5 0.5M17 7l0.5 -0.5M7 7l-0.5 -0.5M7 17l-0.5 0.5;M18.5 18.5l0.5 0.5M18.5 5.5l0.5 -0.5M5.5 5.5l-0.5 -0.5M5.5 18.5l-0.5 0.5"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="2;0"/></path><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -45,21 +45,44 @@
   }
 
   /*
-   * Берём центр SVG-иконки через getBoundingClientRect.
-   * getBoundingClientRect всегда в координатах visual viewport.
-   * clip-path на ::view-transition и position:fixed overlay тоже
-   * в координатах visual viewport.
-   * НЕ добавляем visualViewport.offsetTop — это и было причиной смещения.
+   * КОРЕНЬ ПРОБЛЕМЫ:
+   * nav имеет backdrop-filter: blur() — это создаёт новый stacking context
+   * и новую систему координат. getBoundingClientRect() на SVG внутри такого
+   * элемента на мобильных браузерах (Chrome, Samsung) возвращает координаты
+   * относительно этого контекста, а не viewport.
+   *
+   * РЕШЕНИЕ:
+   * Временно убираем backdrop-filter с nav перед чтением координат,
+   * читаем rect, затем возвращаем всё обратно. Это занимает 0мс (синхронно)
+   * и браузер не успевает перерисовать страницу.
    */
   function getSVGCenter() {
     const svg = themeBtn?.querySelector('svg');
-    const el  = svg || themeBtn;
-    if (!el) return { x: window.innerWidth / 2, y: 40 };
-    const r = el.getBoundingClientRect();
-    return {
-      x: Math.round(r.left + r.width  / 2),
-      y: Math.round(r.top  + r.height / 2)
-    };
+    const nav = document.querySelector('nav');
+
+    if (!svg) {
+      return { x: Math.round(window.innerWidth / 2), y: 40 };
+    }
+
+    // Временно отключаем backdrop-filter на nav
+    let oldFilter = '';
+    if (nav) {
+      oldFilter = nav.style.backdropFilter;
+      nav.style.backdropFilter = 'none';
+      nav.style.webkitBackdropFilter = 'none';
+    }
+
+    const r = svg.getBoundingClientRect();
+    const cx = Math.round(r.left + r.width  / 2);
+    const cy = Math.round(r.top  + r.height / 2);
+
+    // Возвращаем backdrop-filter обратно
+    if (nav) {
+      nav.style.backdropFilter = oldFilter;
+      nav.style.webkitBackdropFilter = oldFilter;
+    }
+
+    return { x: cx, y: cy };
   }
 
   function maxR(x, y) {

@@ -44,26 +44,40 @@
     if (btnText)  btnText.textContent = dark ? 'Light mode' : 'Dark mode';
   }
 
-  // Функция для точного вычисления высоты верхней панели браузера
-  function getGeometry() {
+  // Вычисляем геометрию и положение адресной строки
+  function getGeometry(e) {
     const test = document.createElement('div');
-    // Фиксируем элемент на 100vh. В мобильных браузерах fixed-блоки игнорируют 
-    // динамическое сжатие от адресной строки и уходят под нее, если она сверху.
     test.style.cssText = 'position:fixed;top:0;left:0;height:100vh;visibility:hidden;pointer-events:none;';
     document.body.appendChild(test);
     const rect = test.getBoundingClientRect();
     document.body.removeChild(test);
 
-    // Если rect.top < 0, значит элемент заехал под верхнюю панель. 
-    // Его абсолютное значение и есть высота адресной строки (сдвиг).
-    const topOffset = rect.top < 0 ? Math.abs(rect.top) : 0;
-    return {
-      topOffset,
-      fullHeight: rect.height // Честные 100vh реального экрана для расчета радиуса
-    };
+    const fullHeight = rect.height; // Полная высота 100vh холста
+    const barHeight  = Math.max(0, fullHeight - window.innerHeight); // Общая высота панелей браузера
+
+    let topBarOffset = 0;
+
+    if (barHeight > 0) {
+      // Проверяем через координаты клика, где находится адресная строка
+      if (e && typeof e.screenY === 'number' && typeof e.clientY === 'number') {
+        const totalTop = e.screenY - e.clientY;
+        // Если расстояние от верха экрана устройства до вьюпорта больше 65px,
+        // значит сверху находится адресная строка + системный статус-бар.
+        if (totalTop > 65) {
+          topBarOffset = barHeight;
+        }
+      } else {
+        // Резервный вариант на случай программного вызова (без клика мышью/тача)
+        if (/Android/i.test(navigator.userAgent)) {
+          topBarOffset = barHeight; // На Android строка почти всегда сверху
+        }
+      }
+    }
+
+    return { topBarOffset, fullHeight };
   }
 
-  function getSVGCenter(topOffset) {
+  function getSVGCenter(topBarOffset) {
     const svg = themeBtn?.querySelector('svg');
     const el  = svg || themeBtn;
     if (!el) return { visual: { x: window.innerWidth/2, y: 40 }, layout: { x: window.innerWidth/2, y: 40 } };
@@ -76,12 +90,11 @@
     const offX    = vv ? vv.offsetLeft : 0;
     const offY    = vv ? vv.offsetTop  : 0;
 
-    // Корректируем базовую Y-координату на высоту верхней панели
-    const correctedY = vcy + topOffset;
-
     return {
-      visual: { x: Math.round(vcx),        y: Math.round(correctedY) },
-      layout: { x: Math.round(vcx + offX), y: Math.round(correctedY + offY) }
+      // Для HTML-оверлея (position:fixed работает внутри вьюпорта, смещение не нужно)
+      visual: { x: Math.round(vcx),        y: Math.round(vcy) },
+      // Для View Transition (добавляем смещение верхней панели, если она сверху)
+      layout: { x: Math.round(vcx + offX), y: Math.round(vcy + offY + topBarOffset) }
     };
   }
 
@@ -89,19 +102,16 @@
     return Math.ceil(Math.hypot(Math.max(x, w - x), Math.max(y, h - y)));
   }
 
-  async function toggle() {
+  async function toggle(e) {
     if (busy) return;
     busy = true;
 
-    const geometry = getGeometry();
-    const centers  = getSVGCenter(geometry.topOffset);
+    const geometry = getGeometry(e);
+    const centers  = getSVGCenter(geometry.topBarOffset);
     const dur      = 600;
     const nextDark = !isDark;
 
     const vv = window.visualViewport;
-    
-    // Задаем высоту холста равной полной высоте экрана (100vh из getGeometry),
-    // чтобы при расчете максимального радиуса круг гарантированно покрывал скрытые области.
     const lw = window.innerWidth;
     const lh = geometry.fullHeight;
     const vw = vv ? vv.width  : window.innerWidth;
@@ -136,37 +146,27 @@
       return;
     }
 
-    // Fallback
+    // Улучшенный и исправленный Fallback (без резких скачков цвета)
     document.body.classList.add('no-tr');
+    const ov = document.createElement('div');
+    ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${ovSmall};will-change:clip-path;`;
+    document.body.appendChild(ov);
 
-    if (nextDark) {
-      const ov = document.createElement('div');
-      ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:#111119;clip-path:${ovSmall};will-change:clip-path;`;
-      document.body.appendChild(ov);
-      isDark = true;
-      applyTheme(true);
-      document.body.classList.remove('no-tr');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        ov.style.transition = `clip-path ${dur}ms cubic-bezier(.4,0,.2,1)`;
-        ov.style.clipPath   = ovBig;
-        ov.addEventListener('transitionend', () => { ov.remove(); busy = false; }, { once: true });
-      }));
-    } else {
-      isDark = false;
-      applyTheme(false);
-      document.body.classList.remove('no-tr');
-      const ov = document.createElement('div');
-      ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:#111119;clip-path:${ovBig};will-change:clip-path;`;
-      document.body.appendChild(ov);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        ov.style.transition = `clip-path ${dur}ms cubic-bezier(.4,0,.2,1)`;
-        ov.style.clipPath   = ovSmall;
-        ov.addEventListener('transitionend', () => { ov.remove(); busy = false; }, { once: true });
-      }));
-    }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ov.style.transition = `clip-path ${dur}ms cubic-bezier(.4,0,.2,1)`;
+      ov.style.clipPath   = ovBig;
+      ov.addEventListener('transitionend', () => {
+        isDark = nextDark;
+        applyTheme(isDark);
+        ov.remove();
+        document.body.classList.remove('no-tr');
+        busy = false;
+      }, { once: true });
+    }));
   }
 
-  if (themeBtn) themeBtn.addEventListener('click', toggle);
+  // Обязательно передаем объект события (e) в функцию toggle
+  if (themeBtn) themeBtn.addEventListener('click', (e) => toggle(e));
 
   applyTheme(false);
 })();

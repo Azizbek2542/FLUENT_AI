@@ -158,14 +158,15 @@ body{font-family:var(--sans);color:var(--ivory);background-color: var(--ivory2);
 }
 
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:500;
+  position:absolute;top:0;left:0;right:0;z-index:500;
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 5vw;
+  backdrop-filter:blur(24px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .dark-mode nav {
-    box-shadow: 0 5px 18px yellow;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.5);
 }
 
 .hero {

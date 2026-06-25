@@ -44,7 +44,6 @@
     if (btnText)  btnText.textContent = dark ? 'Light mode' : 'Dark mode';
   }
 
-  // Вычисляем геометрию и положение адресной строки
   function getGeometry(e) {
     const test = document.createElement('div');
     test.style.cssText = 'position:fixed;top:0;left:0;height:100vh;visibility:hidden;pointer-events:none;';
@@ -52,25 +51,25 @@
     const rect = test.getBoundingClientRect();
     document.body.removeChild(test);
 
-    const fullHeight = rect.height; // Полная высота 100vh холста
-    const barHeight  = Math.max(0, fullHeight - window.innerHeight); // Общая высота панелей браузера
+    const fullHeight = rect.height;
+    const barHeight  = Math.max(0, fullHeight - window.innerHeight);
 
     let topBarOffset = 0;
 
-    if (barHeight > 0) {
-      // Проверяем через координаты клика, где находится адресная строка
+    // Проверяем: это чистый мобильный Chrome? (Исключаем Samsung)
+    const ua = navigator.userAgent;
+    const isSamsung = /SamsungBrowser/i.test(ua);
+    const isPureChromeMobile = /Chrome/i.test(ua) && /Android/i.test(ua) && !isSamsung;
+
+    // Сдвиг нужен только для чистого Chrome с верхней адресной строкой
+    if (isPureChromeMobile && barHeight > 0) {
       if (e && typeof e.screenY === 'number' && typeof e.clientY === 'number') {
         const totalTop = e.screenY - e.clientY;
-        // Если расстояние от верха экрана устройства до вьюпорта больше 65px,
-        // значит сверху находится адресная строка + системный статус-бар.
         if (totalTop > 65) {
           topBarOffset = barHeight;
         }
       } else {
-        // Резервный вариант на случай программного вызова (без клика мышью/тача)
-        if (/Android/i.test(navigator.userAgent)) {
-          topBarOffset = barHeight; // На Android строка почти всегда сверху
-        }
+        topBarOffset = barHeight;
       }
     }
 
@@ -91,9 +90,7 @@
     const offY    = vv ? vv.offsetTop  : 0;
 
     return {
-      // Для HTML-оверлея (position:fixed работает внутри вьюпорта, смещение не нужно)
       visual: { x: Math.round(vcx),        y: Math.round(vcy) },
-      // Для View Transition (добавляем смещение верхней панели, если она сверху)
       layout: { x: Math.round(vcx + offX), y: Math.round(vcy + offY + topBarOffset) }
     };
   }
@@ -146,7 +143,6 @@
       return;
     }
 
-    // Улучшенный и исправленный Fallback (без резких скачков цвета)
     document.body.classList.add('no-tr');
     const ov = document.createElement('div');
     ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${ovSmall};will-change:clip-path;`;
@@ -165,7 +161,6 @@
     }));
   }
 
-  // Обязательно передаем объект события (e) в функцию toggle
   if (themeBtn) themeBtn.addEventListener('click', (e) => toggle(e));
 
   applyTheme(false);

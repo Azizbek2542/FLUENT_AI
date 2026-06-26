@@ -1,31 +1,3 @@
-// ========== ДОБАВЬТЕ ЭТО В САМОЕ НАЧАЛО ==========
-const CURRENT_CHAT_VERSION = '1'; // начальная версия
-
-async function checkChatReset() {
-  try {
-    const res = await fetch('https://fluent-ai-ujjf.onrender.com/api/chat-version');
-    const data = await res.json();
-    
-    const serverVersion = data.version.toString();
-    const savedVersion = localStorage.getItem('fluent_chat_version') || '0';
-    
-    if (parseInt(savedVersion) < parseInt(serverVersion)) {
-      localStorage.removeItem('fluent_chat_history');
-      localStorage.setItem('fluent_chat_version', serverVersion);
-      chatHistory = [];
-    }
-  } catch (e) {
-    // сервер недоступен — используем локальную версию как fallback
-    const savedVersion = localStorage.getItem('fluent_chat_version') || '0';
-    if (parseInt(savedVersion) < parseInt(CURRENT_CHAT_VERSION)) {
-      localStorage.removeItem('fluent_chat_history');
-      localStorage.setItem('fluent_chat_version', CURRENT_CHAT_VERSION);
-      chatHistory = [];
-    }
-  }
-}
-// ===================================================
-
 const savedHistory = localStorage.getItem('fluent_chat_history');
 let chatHistory = savedHistory ? JSON.parse(savedHistory) : [];
 let isSending = false;
@@ -258,6 +230,4 @@ function initChat() {
   }
 }
 
-// initChat();
-checkChatReset().then(() => initChat());
-
+initChat();

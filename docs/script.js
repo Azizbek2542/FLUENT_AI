@@ -40,11 +40,28 @@ function addDateDivider(ts) {
   wrap.appendChild(divider);
 }
 
+// function handleChatKey(e) {
+//   if (e.key === 'Enter' && !e.shiftKey) {
+//     e.preventDefault();
+//     if (!isSending) sendMessage();
+//   }
+// }
+
 function handleChatKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
+  if (e.key !== 'Enter') return;
+
+  // На мобильных (touch) Enter всегда = перенос строки
+  const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (isTouch) {
+    return; // не предотвращаем — textarea сама сделает перенос
+  }
+
+  // На ПК: Enter без Shift = отправка
+  if (!e.shiftKey) {
     e.preventDefault();
     if (!isSending) sendMessage();
   }
+  // На ПК: Shift+Enter = перенос (стандартное поведение textarea, не трогаем)
 }
 
 function autoResize(el) {

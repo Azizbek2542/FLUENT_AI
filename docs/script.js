@@ -3,7 +3,7 @@ const CURRENT_CHAT_VERSION = '1'; // начальная версия
 
 async function checkChatReset() {
   try {
-    const res = await fetch('http://localhost:3001/api/chat-version');
+    const res = await fetch('https://fluent-ai-ujjf.onrender.com/api/chat-version');
     const data = await res.json();
     
     const serverVersion = data.version.toString();

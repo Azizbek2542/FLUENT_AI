@@ -14,18 +14,6 @@
   style.textContent = `
     .no-tr, .no-tr * { transition: none !important; }
 
-    /* ТОТ САМЫЙ ОБХОДНОЙ ПУТЬ ЧЕРЕЗ CSS */
-    /* Принудительно выравниваем слои по размеру динамического мобильного вьюпорта */
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      position: fixed !important;
-      inset: 0 !important;
-      height: 100dvh !important;
-      width: 100vw !important;
-      object-fit: cover !important;
-      object-position: top !important;
-    }
-
     .to-dark::view-transition-old(root) { z-index: 1; animation: none; }
     .to-dark::view-transition-new(root) { z-index: 2; animation: vt-expand var(--vt-dur,600ms) cubic-bezier(.4,0,.2,1) forwards; }
 
@@ -56,16 +44,57 @@
     if (btnText)  btnText.textContent = dark ? 'Light mode' : 'Dark mode';
   }
 
-  function getClickCenter(e) {
-    // Берем чистые координаты клика по экрану
-    if (e && typeof e.clientX === 'number' && typeof e.clientY === 'number') {
-      return { x: Math.round(e.clientX), y: Math.round(e.clientY) };
+  // Вычисляем геометрию и положение адресной строки
+  function getGeometry(e) {
+    const test = document.createElement('div');
+    test.style.cssText = 'position:fixed;top:0;left:0;height:100vh;visibility:hidden;pointer-events:none;';
+    document.body.appendChild(test);
+    const rect = test.getBoundingClientRect();
+    document.body.removeChild(test);
+
+    const fullHeight = rect.height; // Полная высота 100vh холста
+    const barHeight  = Math.max(0, fullHeight - window.innerHeight); // Общая высота панелей браузера
+
+    let topBarOffset = 0;
+
+    if (barHeight > 0) {
+      // Проверяем через координаты клика, где находится адресная строка
+      if (e && typeof e.screenY === 'number' && typeof e.clientY === 'number') {
+        const totalTop = e.screenY - e.clientY;
+        // Если расстояние от верха экрана устройства до вьюпорта больше 65px,
+        // значит сверху находится адресная строка + системный статус-бар.
+        if (totalTop > 65) {
+          topBarOffset = barHeight;
+        }
+      } else {
+        // Резервный вариант на случай программного вызова (без клика мышью/тача)
+        if (/Android/i.test(navigator.userAgent)) {
+          topBarOffset = barHeight; // На Android строка почти всегда сверху
+        }
+      }
     }
-    // Если кликнули с клавиатуры — берем центр кнопки
-    const rect = themeBtn ? themeBtn.getBoundingClientRect() : { left: window.innerWidth/2, top: 40, width: 0, height: 0 };
+
+    return { topBarOffset, fullHeight };
+  }
+
+  function getSVGCenter(topBarOffset) {
+    const svg = themeBtn?.querySelector('svg');
+    const el  = svg || themeBtn;
+    if (!el) return { visual: { x: window.innerWidth/2, y: 40 }, layout: { x: window.innerWidth/2, y: 40 } };
+
+    const r   = el.getBoundingClientRect();
+    const vcx = r.left + r.width  / 2;
+    const vcy = r.top  + r.height / 2;
+
+    const vv      = window.visualViewport;
+    const offX    = vv ? vv.offsetLeft : 0;
+    const offY    = vv ? vv.offsetTop  : 0;
+
     return {
-      x: Math.round(rect.left + rect.width / 2),
-      y: Math.round(rect.top + rect.height / 2)
+      // Для HTML-оверлея (position:fixed работает внутри вьюпорта, смещение не нужно)
+      visual: { x: Math.round(vcx),        y: Math.round(vcy) },
+      // Для View Transition (добавляем смещение верхней панели, если она сверху)
+      layout: { x: Math.round(vcx + offX), y: Math.round(vcy + offY + topBarOffset) }
     };
   }
 
@@ -77,16 +106,28 @@
     if (busy) return;
     busy = true;
 
-    const center   = getClickCenter(e);
+    const geometry = getGeometry(e);
+    const centers  = getSVGCenter(geometry.topBarOffset);
     const dur      = 600;
     const nextDark = !isDark;
 
-    const w = window.innerWidth;
-    const h = window.innerHeight; 
-    const r = maxR(center.x, center.y, w, h);
+    const vv = window.visualViewport;
+    const lw = window.innerWidth;
+    const lh = geometry.fullHeight;
+    const vw = vv ? vv.width  : window.innerWidth;
+    const vh = geometry.fullHeight;
 
-    const vtSmall = `circle(0px at ${center.x}px ${center.y}px)`;
-    const vtBig   = `circle(${r}px at ${center.x}px ${center.y}px)`;
+    const lcx = centers.layout.x;
+    const lcy = centers.layout.y;
+    const lr  = maxR(lcx, lcy, lw, lh);
+    const vtSmall = `circle(0px at ${lcx}px ${lcy}px)`;
+    const vtBig   = `circle(${lr}px at ${lcx}px ${lcy}px)`;
+
+    const vcx = centers.visual.x;
+    const vcy = centers.visual.y;
+    const vr  = maxR(vcx, vcy, vw, vh);
+    const ovSmall = `circle(0px at ${vcx}px ${vcy}px)`;
+    const ovBig   = `circle(${vr}px at ${vcx}px ${vcy}px)`;
 
     if (document.startViewTransition) {
       const root = document.documentElement;
@@ -105,15 +146,15 @@
       return;
     }
 
-    // Резервный сценарий для старых браузеров (тоже работает через чистый fixed div)
+    // Улучшенный и исправленный Fallback (без резких скачков цвета)
     document.body.classList.add('no-tr');
     const ov = document.createElement('div');
-    ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${vtSmall};will-change:clip-path;`;
+    ov.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${nextDark ? '#111119' : '#ffffff'};clip-path:${ovSmall};will-change:clip-path;`;
     document.body.appendChild(ov);
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
       ov.style.transition = `clip-path ${dur}ms cubic-bezier(.4,0,.2,1)`;
-      ov.style.clipPath   = vtBig;
+      ov.style.clipPath   = ovBig;
       ov.addEventListener('transitionend', () => {
         isDark = nextDark;
         applyTheme(isDark);
@@ -124,6 +165,7 @@
     }));
   }
 
+  // Обязательно передаем объект события (e) в функцию toggle
   if (themeBtn) themeBtn.addEventListener('click', (e) => toggle(e));
 
   applyTheme(false);

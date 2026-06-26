@@ -9,21 +9,6 @@ app.use(express.json());
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
-// ========== ДОБАВЬТЕ ЭТО ==========
-let resetVersion = 1; // увеличивайте, чтобы сбросить чат у всех
-
-// API для проверки версии (GET)
-app.get('/api/chat-version', (req, res) => {
-  res.json({ version: resetVersion });
-});
-
-// API для сброса чата у всех (POST)
-app.post('/api/reset-chat', (req, res) => {
-  resetVersion++;
-  res.json({ success: true, newVersion: resetVersion });
-});
-// =====================================
-
 app.post("/chat", async (req, res) => {
     try {
         const { message, history } = req.body;
